@@ -129,6 +129,10 @@
                     <hr>
                     <img class="img-responsive img-border img-left" src="img/intro-pic.jpg" alt="">
                     <hr class="visible-xs">
+
+               
+
+                    
                     <p>The boxes used in this template are nested inbetween a normal Bootstrap row and the start of your column layout. The boxes will be full-width boxes, so if you want to make them smaller then you will need to customize.</p>
                     <p>A huge thanks to <a href="http://join.deathtothestockphoto.com/" target="_blank">Death to the Stock Photo</a> for allowing us to use the beautiful photos that make this template really come to life. When using this template, make sure your photos are decent. Also make sure that the file size on your photos is kept to a minumum to keep load times to a minimum.</p>
                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc placerat diam quis nisl vestibulum dignissim. In hac habitasse platea dictumst. Interdum et malesuada fames ac ante ipsum primis in faucibus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>
@@ -175,6 +179,154 @@
         interval: 5000 //changes the speed
     })
     </script>
+    
+    
+    
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0/angular.min.js"></script>
+<script type="text/javascript">
+angular.module("freegeoip", [function($locationProvider) {
+	$locationProvider.html5Mode(true);
+}])
+.controller("queryController", function($scope, $http, $location) {
+	$scope.q = '';
+	$scope.error = '';
+	$scope.record = {};
+	$scope.searching = false;
+	$scope.lastUpdated = '';
+	$scope.rateLimit = {ok: false, remaining: 0, expires: 0};
+	$scope.search = function(q) {
+		$scope.searching = true;
+		$http.get("json/" + (q || '')).
+		success(function(data, status, headers) {
+			if ($scope.error) $scope.error = '';
+			if (!q) {
+				q = data.ip;
+				$location.search({'q': data.ip});
+			}
+			if (!$scope.q) {
+				$scope.q = q;
+			}
+			$scope.record = data;
+			$scope.lastUpdated = headers('X-Database-Date');
+			var n = headers('X-RateLimit-Remaining');
+			var reset = parseInt(headers('X-RateLimit-Reset'), 10);
+			if (n) {
+				$scope.rateLimit = {
+					ok: true,
+					remaining: n,
+					expires: Math.floor(reset/60) + ' minutes'
+				};
+			}
+			$scope.searching = false;
+		})
+		.error(function(data, status) {
+			$scope.lastUpdated = '';
+			$scope.rateLimit = {ok: false, remaining: 0, expires: 0};
+			$scope.error = 'HTTP ' + status + ': ' + data;
+			$scope.searching = false;
+		});
+	}
+	$scope.submit = function(q) {
+		$location.search({'q': q});
+		$scope.search(q);
+	}
+	$scope.search($location.search()['q']);
+});
+</script>
+    
+    
+    
+    <div class="col-sm-6" ng-controller="queryController">
+			<form class="form" role="form" ng-submit="submit(q)">
+				<input type="text" ng-model="q" name="q" ng-disabled="searching" class="form-control" placeholder="Search IP or hostname" autofocus>
+			</form>
+			<br/>
+			<p ng-show="searching">Searching, please wait...</p>
+			<p ng-show="error" class="label label-danger">Server returned {{error}}</p>
+			<small ng-show="rateLimit.ok&&!searching">{{rateLimit.remaining}} calls remaining, resets in {{rateLimit.expires}}<br/></small>
+			<small ng-show="lastUpdated&&!searching">IP database date: {{lastUpdated}}</small><br/>
+			<table ng-hide="error||searching" class="table">
+				<tr ng-show="record.ip != q">
+					<td>IP</td>
+					<td>{{record.ip}}</td>
+				</tr>
+				<tr>
+					<td>Country</td>
+					<td>{{record.country_name}}</td>
+				</tr>
+				<tr>
+					<td>Region</td>
+					<td>{{record.region_name}}</td>
+				</tr>
+				<tr>
+					<td>City</td>
+					<td>{{record.city}}</td>
+				</tr>
+				<tr>
+					<td>Zip/Postal code</td>
+					<td>{{record.zip_code}}</td>
+				</tr>
+				<tr>
+					<td>Lat/Long</td>
+					<td>
+						<a href="https://www.google.com.au/maps/preview/@{{record.latitude}},{{record.longitude}},8z" ng-show="record.latitude && record.longitude" target="_blank">
+							{{record.latitude}}, {{record.longitude}}
+						</a>
+					</td>
+				</tr>
+				<tr>
+					<td>Metro code</td>
+					<td>{{record.metro_code||''}}</td>
+				</tr>
+				<tr>
+					<td>Time zone</td>
+					<td>
+						<a href="http://en.wikipedia.org/wiki/{{record.time_zone}}" ng-show="record.time_zone" target="_blank">
+							{{record.time_zone}}
+						</a>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+	</div> <!-- /row -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
 </body>
 
